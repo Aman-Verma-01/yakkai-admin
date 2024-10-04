@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ColumnDef,
   useReactTable,
@@ -31,87 +31,108 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { ScrollArea } from "../ui/scroll-area";
-import {
-  EllipsisVertical,
-  Eye,
-  OctagonX,
-  Trash,
-  Trash2,
-} from "lucide-react";
+import { EllipsisVertical, Eye, OctagonX, Trash, Trash2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-
+import axios from "axios";
+import { baseUrl, token } from "../utils/baseUrl";
 interface User {
   id: number;
   username: string;
   email: string;
-  FullName: string;
+  provider: string;
+  confirmed: boolean;
+  blocked: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const user: User[] = [
-  {
-    id: 1,
-    username: "amanv123",
-    email: "aman.verma@example.com",
-    FullName: "Aman Verma",
-  },
-  {
-    id: 2,
-    username: "john_doe",
-    email: "john.doe@example.com",
-    FullName: "John Doe",
-  },
-  {
-    id: 3,
-    username: "jane_smith",
-    email: "jane.smith@example.com",
-    FullName: "Jane Smith",
-  },
-  {
-    id: 4,
-    username: "michael_b",
-    email: "michael.b@example.com",
-    FullName: "Michael Brown",
-  },
-  {
-    id: 5,
-    username: "emily.j",
-    email: "emily.j@example.com",
-    FullName: "Emily Johnson",
-  },
-  {
-    id: 6,
-    username: "robert.w",
-    email: "robert.williams@example.com",
-    FullName: "Robert Williams",
-  },
-  {
-    id: 7,
-    username: "lisa.m",
-    email: "lisa.miller@example.com",
-    FullName: "Lisa Miller",
-  },
-  {
-    id: 8,
-    username: "david_s",
-    email: "david.smith@example.com",
-    FullName: "David Smith",
-  },
-  {
-    id: 9,
-    username: "sarah_l",
-    email: "sarah.lewis@example.com",
-    FullName: "Sarah Lewis",
-  },
-  {
-    id: 10,
-    username: "chris_j",
-    email: "chris.jones@example.com",
-    FullName: "Chris Jones",
-  },
-];
+// const user: User[] = [
+//   {
+//     id: 1,
+//     username: "amanv123",
+//     email: "aman.verma@example.com",
+//     FullName: "Aman Verma",
+//   },
+//   {
+//     id: 2,
+//     username: "john_doe",
+//     email: "john.doe@example.com",
+//     FullName: "John Doe",
+//   },
+//   {
+//     id: 3,
+//     username: "jane_smith",
+//     email: "jane.smith@example.com",
+//     FullName: "Jane Smith",
+//   },
+//   {
+//     id: 4,
+//     username: "michael_b",
+//     email: "michael.b@example.com",
+//     FullName: "Michael Brown",
+//   },
+//   {
+//     id: 5,
+//     username: "emily.j",
+//     email: "emily.j@example.com",
+//     FullName: "Emily Johnson",
+//   },
+//   {
+//     id: 6,
+//     username: "robert.w",
+//     email: "robert.williams@example.com",
+//     FullName: "Robert Williams",
+//   },
+//   {
+//     id: 7,
+//     username: "lisa.m",
+//     email: "lisa.miller@example.com",
+//     FullName: "Lisa Miller",
+//   },
+//   {
+//     id: 8,
+//     username: "david_s",
+//     email: "david.smith@example.com",
+//     FullName: "David Smith",
+//   },
+//   {
+//     id: 9,
+//     username: "sarah_l",
+//     email: "sarah.lewis@example.com",
+//     FullName: "Sarah Lewis",
+//   },
+//   {
+//     id: 10,
+//     username: "chris_j",
+//     email: "chris.jones@example.com",
+//     FullName: "Chris Jones",
+//   },
+// ];
 
 const GetUserTable: React.FC = () => {
   const [filterValue, setFilterValue] = useState<string>("");
+  const [user, setUser] = useState<User[]>([]);
+
+  const getUser = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.status === 200) {
+        console.log(response.data);
+        setUser(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      alert("Error fetching user");
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
 
   const handleSearchChange = (value: string) => {
     setFilterValue(value);
@@ -171,9 +192,9 @@ const GetUserTable: React.FC = () => {
         cell: ({ row }) => <div>{row.getValue("id")}</div>,
       },
       {
-        accessorKey: "FullName",
+        accessorKey: "username",
         header: "Full Name",
-        cell: ({ row }) => <div>{capitalize(row.getValue("FullName"))}</div>,
+        cell: ({ row }) => <div>{capitalize(row.getValue("username"))}</div>,
       },
       {
         accessorKey: "username",
@@ -378,4 +399,3 @@ const GetUserTable: React.FC = () => {
 };
 
 export default GetUserTable;
-
