@@ -31,115 +31,111 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { ScrollArea } from "../ui/scroll-area";
-import {
-  EllipsisVertical,
-  Eye,
-  OctagonX,
-  Trash,
-  Trash2,
-} from "lucide-react";
+import { EllipsisVertical, Eye, OctagonX, Trash, Trash2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import ReportUserDetails from "../helper-components/report-user-details";
+import { useRouter } from "next/navigation";
 
 interface User {
-  id: number;
-  username: string;
-  email: string;
-  FullName: string;
+  id?: number;
+  username?: string;
+  email?: string;
+  provider?: string;
+  confirmed?: boolean;
+  blocked?: boolean;
+  fullName?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-const user: User[] = [
+interface DataItem {
+  id: number;
+  email: string;
+  name: string;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  phoneNumber: string;
+  user: User | null;
+}
+
+const user: DataItem[] = [
   {
-    id: 1,
-    username: "amanv123",
-    email: "aman.verma@example.com",
-    FullName: "Aman Verma",
+    id: 13,
+    email: "ran@gmail.com",
+    name: "Ranveer",
+    message: "Reporting Alia",
+    createdAt: "2024-10-07T15:55:51.090Z",
+    updatedAt: "2024-10-07T15:55:51.090Z",
+    publishedAt: "2024-10-07T15:55:51.083Z",
+    phoneNumber: "9015663658",
+    user: {
+      id: 11,
+      username: "Ram",
+      email: "ram@gmail.com",
+      provider: "local",
+      confirmed: true,
+      blocked: false,
+      fullName: "Ram Verma",
+      createdAt: "2024-10-07T15:41:44.429Z",
+      updatedAt: "2024-10-07T15:42:31.855Z",
+    },
   },
   {
-    id: 2,
-    username: "john_doe",
-    email: "john.doe@example.com",
-    FullName: "John Doe",
-  },
-  {
-    id: 3,
-    username: "jane_smith",
-    email: "jane.smith@example.com",
-    FullName: "Jane Smith",
-  },
-  {
-    id: 4,
-    username: "michael_b",
-    email: "michael.b@example.com",
-    FullName: "Michael Brown",
-  },
-  {
-    id: 5,
-    username: "emily.j",
-    email: "emily.j@example.com",
-    FullName: "Emily Johnson",
-  },
-  {
-    id: 6,
-    username: "robert.w",
-    email: "robert.williams@example.com",
-    FullName: "Robert Williams",
-  },
-  {
-    id: 7,
-    username: "lisa.m",
-    email: "lisa.miller@example.com",
-    FullName: "Lisa Miller",
-  },
-  {
-    id: 8,
-    username: "david_s",
-    email: "david.smith@example.com",
-    FullName: "David Smith",
-  },
-  {
-    id: 9,
-    username: "sarah_l",
-    email: "sarah.lewis@example.com",
-    FullName: "Sarah Lewis",
-  },
-  {
-    id: 10,
-    username: "chris_j",
-    email: "chris.jones@example.com",
-    FullName: "Chris Jones",
+    id: 14,
+    email: "ran@gmail.com",
+    name: "Ranveer",
+    message: "Reporting Pihu",
+    createdAt: "2024-10-07T16:27:32.619Z",
+    updatedAt: "2024-10-07T16:27:32.619Z",
+    publishedAt: "2024-10-07T16:27:32.615Z",
+    phoneNumber: "9015663658",
+    user: {
+      id: 9,
+      username: "Pihu",
+      email: "pihu@gmail.com",
+      provider: "local",
+      confirmed: true,
+      blocked: false,
+      fullName: "Pihu Sharma",
+      createdAt: "2024-10-07T15:41:01.369Z",
+      updatedAt: "2024-10-07T15:41:01.369Z",
+    },
   },
 ];
 
 const GetReportTable: React.FC = () => {
+  const router = useRouter()
   const [filterValue, setFilterValue] = useState<string>("");
 
   const handleSearchChange = (value: string) => {
     setFilterValue(value);
-    setPagination((prev) => ({ ...prev, pageIndex: 0 })); // reset to the first page on search
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
   const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPagination({
-      pageIndex: 0, // reset to the first page on rows per page change
+      pageIndex: 0,
       pageSize: Number(
         e.target?.value === "all" ? filteredData.length : e.target?.value
       ),
     });
   };
 
-  const filteredData = useMemo(() => {
+  const filteredData = useMemo(() => {  
     let data = user ?? [];
 
     if (filterValue) {
-      data = data?.filter((user: User) =>
-        user.username.toLowerCase().includes(filterValue.toLowerCase())
+      data = data?.filter((user: DataItem) =>
+        user.name.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
 
     return data;
   }, [user, filterValue]);
 
-  const columns: ColumnDef<User>[] = useMemo(
+  const columns: ColumnDef<DataItem>[] = useMemo(
     () => [
       {
         id: "select",
@@ -171,88 +167,93 @@ const GetReportTable: React.FC = () => {
         cell: ({ row }) => <div>{row.getValue("id")}</div>,
       },
       {
-        accessorKey: "FullName",
+        accessorKey: "name",
         header: "Reported By",
-        cell: ({ row }) => <div>{capitalize(row.getValue("FullName"))}</div>,
+        cell: ({ row }) => <div>{capitalize(row.getValue("name"))}</div>,
       },
       {
-        accessorKey: "username",
+        accessorKey: "user",
         header: "Reported On",
-        cell: ({ row }) => <div>{capitalize(row.getValue("username"))}</div>,
-      },
-      // {
-      //   accessorKey: "email",
-      //   header: "Email",
-      //   cell: ({ row }) => <div>{capitalize(row.getValue("email"))}</div>,
-      // },
+        cell: ({ row }) => {
+          const user: User = row.getValue("user");
+          console.log(user.fullName)
 
+          return (
+            <div>{user.username}</div>
+          )
+        }
+      },
       {
         accessorKey: "id",
         header: "Actions",
-        cell: () => (
-          <div className="relative inline-block text-left">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant={"ghost"}>
-                  <EllipsisVertical />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="flex flex-col gap-2 p-4">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="flex items-center gap-2"
-                    >
-                      <Eye />
-                      View
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="h-[350px] w-[575px] rounded-xl">
-                    <ScrollArea></ScrollArea>
-                  </DialogContent>
-                </Dialog>
-
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      className="flex items-center gap-2"
-                    >
-                      <Trash2 />
-                      Delete
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
-                    <DialogTitle className="text-lg font-bold">
-                      Delete Subscription Plan
-                    </DialogTitle>
-                    <p className="text-gray-700">
-                      Are you sure you want to delete this user?
-                    </p>
-                    <div className="flex items-center gap-4 justify-center">
+        cell: ({ row }) => {
+          const rowData = row.original;
+          console.log(rowData)
+      
+          return (
+            <div className="relative inline-block text-left">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant={"ghost"}>
+                    <EllipsisVertical />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="flex flex-col gap-2 p-4">
+                 
+                      <Button
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={()=> {router.push(`/dashboard/reports/${row.getValue("id")}`);}}
+                      >
+                        <Eye />
+                        View
+                      </Button>
+                    
+      
+                  <Dialog>
+                    <DialogTrigger asChild>
                       <Button
                         variant="destructive"
-                        className="flex items-center gap-1"
-                        onClick={() => {}}
+                        className="flex items-center gap-2"
                       >
-                        <Trash size={18} /> Delete
+                        <Trash2 />
+                        Delete
                       </Button>
-                      <Button
-                        variant="default"
-                        className="flex items-center gap-1"
-                      >
-                        <OctagonX size={18} />
-                        Cancel
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </PopoverContent>
-            </Popover>
-          </div>
-        ),
-      },
+                    </DialogTrigger>
+                    <DialogContent className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
+                      <DialogTitle className="text-lg font-bold">
+                        Delete Subscription Plan
+                      </DialogTitle>
+                      <p className="text-gray-700">
+                        Are you sure you want to delete this user?
+                      </p>
+                      <div className="flex items-center gap-4 justify-center">
+                        <Button
+                          variant="destructive"
+                          className="flex items-center gap-1"
+                          onClick={() => {
+                            // Perform delete action here
+                          }}
+                        >
+                          <Trash size={18} /> Delete
+                        </Button>
+                        <Button
+                          variant="default"
+                          className="flex items-center gap-1"
+                        >
+                          <OctagonX size={18} />
+                          Cancel
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </PopoverContent>
+              </Popover>
+            </div>
+          );
+        },
+      }
+      
     ],
     []
   );
@@ -293,6 +294,7 @@ const GetReportTable: React.FC = () => {
             className="max-w-sm"
           />
         </div>
+
         <div className="rounded-md border">
           <Table>
             <TableHeader>
